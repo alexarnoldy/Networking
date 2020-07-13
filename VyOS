@@ -1,7 +1,12 @@
 .Applying a Firewall Rule-Set to an Interface
 * Once a rule-set is created, it can be applied to an interface. Note only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
 * I.e.: `set interfaces ethernet eth1 firewall out name INSIDE-OUT`
-* Seems to drop all traffic originating from outside the local subnet
+** Applies the firewall rule INSIDE-OUT to all forwarded packets outbound from eth1
+* A Rule-Set can be appliend to every inteface:
+** in: Ruleset for forwarded packets on inbound interface
+** out: Ruleset for forwarded packets on outbound interface
+** local: Ruleset for packets destined for this router
+
 ----
 set firewall name OUTSIDE-IN default-action 'drop'
 set firewall name OUTSIDE-IN description 'deny traffic from internet'
