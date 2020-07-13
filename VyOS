@@ -1,0 +1,27 @@
+.Applying a Firewall Rule-Set to an Interface
+* Once a rule-set is created, it can be applied to an interface. Note only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
+* I.e.: `set interfaces ethernet eth1 firewall out name INSIDE-OUT`
+* Seems to drop all traffic originating from outside the local subnet
+----
+set firewall name OUTSIDE-IN default-action 'drop'
+set firewall name OUTSIDE-IN description 'deny traffic from internet'
+----
+`set interfaces ethernet eth0 firewall in name 'OUTSIDE-IN'`
+
+
+* Seems to allow SSH and pings from the local subnet:
+----
+set firewall name OUTSIDE-LOCAL default-action 'drop'
+set firewall name OUTSIDE-LOCAL rule 310 source group address-group SSH-ACCESS
+set firewall name OUTSIDE-LOCAL rule 310 action 'accept'
+set firewall name OUTSIDE-LOCAL rule 310 destination port '22'
+set firewall name OUTSIDE-LOCAL rule 310 protocol 'tcp'
+set firewall name OUTSIDE-LOCAL rule 900 action 'accept'
+set firewall name OUTSIDE-LOCAL rule 900 description 'allow icmp'
+set firewall name OUTSIDE-LOCAL rule 900 protocol 'icmp'
+----
+`set interfaces ethernet eth0 firewall local name 'OUTSIDE-LOCAL'`
+
+
+
+// vim: set syntax=asciidoc:
