@@ -3,10 +3,10 @@
 nmcli connection add type bond con-name bond0 ifname bond0 mode active-backup 
 nmcli connection add type bond-slave ifname eth0 master bond0
 nmcli connection add type bond-slave ifname eth1 master bond0
-nmcli connection  add type bridge con-name bridge200 ifname bridge200 ip4 172.16.200.40/24 gw4 172.16.200.1
+nmcli connection  add type bridge con-name bridge200 ifname bridge200 ip4 172.16.200.40/24 gw4 172.16.200.1 ipv4.dns 172.16.250.2
 nmcli connection modify bond0 connection.master bridge200 connection.slave-type bridge
 nmcli connection up bridge200 
-nmcli connection modify  bridge200 +ipv4.dns 172.16.250.2
+// Not needed when declaring it with the bridge: nmcli connection modify  bridge200 +ipv4.dns 172.16.250.2
 nmcli connection down bridge200  
 nmcli connection up bridge200 
 ----
