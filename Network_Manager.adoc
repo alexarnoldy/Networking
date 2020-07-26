@@ -10,3 +10,15 @@ nmcli connection up bridge200
 nmcli connection down bridge200  
 nmcli connection up bridge200 
 ----
+* Had to wait about 60 seconds for slave connections to come up
+
+#### nmcli to add a vlan to an existing bond then use it for an additional bridge
+----
+nmcli con add type bridge ifname br240 con-name br240 connection.autoconnect yes
+nmcli c mod br240 ipv4.method manual ipv4.address 172.16.240.10/24 ipv4.gateway 172.16.240.1 ipv4.dns 172.16.250.2
+nmcli conn add type vlan con-name vlan240 dev bond0 id 240 master br240 connection.autoconnect yes
+nmcli con down br240
+nmcli con up br240
+----
+* Not sure if need to down/up the bridge or just wait for the slave connections to come up
+* In any case, had to wait about 60 seconds for slave connections to come up
