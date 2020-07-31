@@ -1,0 +1,10 @@
+---
+- hosts: stable
+  remote_user: sles
+  tasks:
+    - name: Add bridge240
+      command: nmcli connection add type bridge ifname bridge240 con-name bridge240 connection.autoconnect yes
+      when: ansible_bridge240.ipv4 is not defined
+    - name: Add vlan240
+      command: nmcli connection add type vlan con-name vlan240 dev bond0 id 240 master bridge240 connection.autoconnect yes
+      when: ansible_vlan240.ipv4 is not defined
