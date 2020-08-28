@@ -1,3 +1,6 @@
+NOTE: Need the SLES Desktop repository enabled to get all of the NetworkManager packages. Without it, you'll only see one NetworkManager source package.
+
+
 #### nmcli to add a bond then use it in a bridge
 ----
 nmcli connection add type bond con-name bond0 ifname bond0 mode active-backup 
