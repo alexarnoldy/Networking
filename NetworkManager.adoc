@@ -1,4 +1,4 @@
-NOTE: Need the SLES Desktop repository enabled to get all of the NetworkManager packages. Without it, you'll only see one NetworkManager source package.
+NOTE: Must have the SLES Desktop Applications Module repository enabled to get all of the NetworkManager packages. Without it, you'll only see one NetworkManager source package.
 
 
 #### nmcli to add a bond then use it in a bridge
