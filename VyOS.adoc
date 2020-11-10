@@ -1,3 +1,35 @@
+== Creating a VyOS template qcow2 image
+
+Before shutting down the image run these commands:
+----
+configure
+delete interface eth0 hw-id
+delete interface eth1 hw-id
+commit
+save
+----
+
+Adding cloud-init:
+
+* `set system name-server 172.16.250.2`
+** `commit; save; exit`
+
+* Update the /etc/apt/sources.list with:
+----
+deb http://deb.debian.org/debian buster main contrib non-free
+deb-src http://deb.debian.org/debian buster main contrib non-free
+
+deb http://deb.debian.org/debian-security/ buster/updates main contrib non-free
+deb-src http://deb.debian.org/debian-security/ buster/updates main contrib non-free
+
+deb http://deb.debian.org/debian buster-updates main contrib non-free
+deb-src http://deb.debian.org/debian buster-updates main contrib non-free
+----
+
+* `sudo apt-get update`
+
+
+
 .Applying a Firewall Rule-Set to an Interface
 * Once a rule-set is created, it can be applied to an interface. Note only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
 * I.e.: `set interfaces ethernet eth1 firewall out name INSIDE-OUT`
