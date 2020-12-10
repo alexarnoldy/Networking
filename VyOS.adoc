@@ -1,15 +1,20 @@
 == Creating a VyOS template qcow2 image
 
 Before shutting down the image run these commands:
+* NOTE: May have to use `set interfaces ethernet eth0 hw-id 11:11:11:11:11:11` before deleting
 ----
 configure
-delete interface eth0 hw-id
-delete interface eth1 hw-id
+delete interface ethernet eth0 hw-id
+delete interface ethernet eth1 hw-id
 commit
 save
 ----
 
-Adding cloud-init:
+## Adding cloud-init:
+
+NOTE: Never actually made cloud-init work on VyOS. Ended up baking in most of the desired settings into the base .qcow2 image, deploying with TF and updating with Ansible.
+
+* Need to ensure the VM has a CDROM
 
 * `set system name-server 172.16.250.2`
 ** `commit; save; exit`
@@ -28,13 +33,43 @@ deb-src http://deb.debian.org/debian buster-updates main contrib non-free
 
 * `sudo apt-get update`
 
+* `sudo apt-get install cloud-init`
 
+
+## Setting up DHCP server and DNS forwarding
+* Doesn't seem to have a traditional DNS server but DHCP server seems to be able to update the /etc/hosts file on the router to provide minimal, local resolution
+* shared-network-name is a way to identify a singlular set of DHCP configurations
+----
+set service dhcp-server hostfile-update
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 default-router 10.0.0.1
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 dns-server 10.0.0.1
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 domain-name aiic.suse.lab
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 lease '86400'
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 range 0 start 10.0.0.10
+set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 range 0 stop 10.0.0.100
+
+set service dns forwarding cache-size '0'
+set service dns forwarding listen-address 10.0.0.1
+set service dns forwarding name-server 172.16.250.2
+set service dns forwarding allow-from 10.0.0.0/24
+----
+* https://lucanuscervus-notes.readthedocs.io/en/latest/Networking/VyOS/dhcp%20and%20dns%20server%20in%20VyOS/
+
+
+## Setting up NAT routing and firewall features
+
+* NAT routing required at a minimum:
+----
+set nat source rule 100 outbound-interface 'eth0'
+set nat source rule 100 source address 10.0.0.0/24
+set nat source rule 100 translation address 'masquerade'
+----
 
 .Applying a Firewall Rule-Set to an Interface
 * Once a rule-set is created, it can be applied to an interface. Note only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
 * I.e.: `set interfaces ethernet eth1 firewall out name INSIDE-OUT`
 ** Applies the firewall rule INSIDE-OUT to all forwarded packets outbound from eth1
-* A Rule-Set can be appliend to every inteface:
+* A Rule-Set can be applied to every inteface:
 ** in: Ruleset for forwarded packets on inbound interface
 ** out: Ruleset for forwarded packets on outbound interface
 ** local: Ruleset for packets destined for this router
