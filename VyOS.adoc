@@ -22,6 +22,11 @@ set interfaces ethernet eth1 description 'INSIDE'
 
 set service ssh port '2244'
 ----
+* Default route (i.e. next hop on the outbound route) is handled differently from v1.4 onwards: https://docs.vyos.io/en/latest/configuration/system/default-route.html
+** v1.4:
+----
+set protocols static route 0.0.0.0/0 next-hop <address> 
+----
 
 ## Setting up DHCP server and DNS forwarding
 * Doesn't seem to have a traditional DNS server but DHCP server seems to be able to update the /etc/hosts file on the router to provide minimal, local resolution
