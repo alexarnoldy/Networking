@@ -2,6 +2,7 @@
 
 Before shutting down the image run these commands:
 * NOTE: May have to use `set interfaces ethernet eth0 hw-id 11:11:11:11:11:11` before deleting
+
 ----
 configure
 set interfaces ethernet eth0 hw-id 11:11:11:11:11:11
@@ -14,6 +15,7 @@ save
 
 ## Setting up eth0 for DHCP and eth1 for a static IP of 10.0.0.1
 * Setting SSH port to 2244 so port 22 can be passed through to the jumphost:
+
 ----
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth0 description 'OUTSIDE'
@@ -22,6 +24,7 @@ set interfaces ethernet eth1 description 'INSIDE'
 
 set service ssh port '2244'
 ----
+
 * Default route (i.e. next hop on the outbound route) is handled differently from v1.4 onwards: https://docs.vyos.io/en/latest/configuration/system/default-route.html
 ** v1.4:
 ----
@@ -32,6 +35,7 @@ set protocols static route 0.0.0.0/0 next-hop <address>
 * Doesn't seem to have a traditional DNS server but DHCP server seems to be able to update the /etc/hosts file on the router to provide minimal, local resolution
 * shared-network-name is a way to identify a singlular set of DHCP configurations
 * Seems that you only need to add the system DNS server (i.e. /etc/resolv.conf): `set system name-server 172.16.250.2`, not `set service dns forwarding name-server 172.16.250.2`
+
 ----
 set service dhcp-server hostfile-update
 set service dhcp-server shared-network-name INSIDE-NET subnet 10.0.0.0/24 default-router 10.0.0.1
@@ -49,12 +53,14 @@ set service dns forwarding listen-address 10.0.0.1
 set service dns forwarding name-server 172.16.250.2
 set service dns forwarding allow-from 10.0.0.0/24
 ----
+
 * https://lucanuscervus-notes.readthedocs.io/en/latest/Networking/VyOS/dhcp%20and%20dns%20server%20in%20VyOS/
 
 
 ## Setting up NAT routing and firewall features
 
 * NAT routing required at a minimum (configuration mode):
+
 ----
 set nat source rule 100 outbound-interface 'eth0'
 set nat source rule 100 source address 10.0.0.0/24
@@ -62,6 +68,7 @@ set nat source rule 100 translation address 'masquerade'
 ----
 
 * NAT port forwarding rules to pass HTTP, HTTPS, and SSH through to a jumphost (configuration mode):
+
 ---
 set nat destination rule 10 description "NAT port 80 to 10.0.0.2"
 set nat destination rule 10 inbound-interface eth0
@@ -80,9 +87,10 @@ set nat destination rule 30 inbound-interface eth0
 set nat destination rule 30 destination port 22
 set nat destination rule 30 protocol tcp
 set nat destination rule 30 translation address 10.0.0.2
+----
 
 .Applying a Firewall Rule-Set to an Interface
-* Once a rule-set is created, it can be applied to an interface. Note only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
+* Once a rule-set is created, it can be applied to an interface. Note: only one rule-set can be applied to each interface for in, out, or local traffic for each protocol (IPv4 and IPv6).
 * I.e.: `set interfaces ethernet eth1 firewall out name INSIDE-OUT`
 ** Applies the firewall rule INSIDE-OUT to all forwarded packets outbound from eth1
 * A Rule-Set can be applied to every inteface:
@@ -94,20 +102,27 @@ set nat destination rule 30 translation address 10.0.0.2
 set firewall name OUTSIDE-IN default-action 'drop'
 set firewall name OUTSIDE-IN description 'deny traffic from internet'
 ----
+
 `set interfaces ethernet eth0 firewall in name 'OUTSIDE-IN'`
 
 
-* Seems to allow SSH and pings from the local subnet:
+* Seems to allow SSH and pings from the outside subnet:
+* Can create a whitelist of IP addresses for the rule group, i.e. 
+#set firewall group address-group SSH-ACCESS address 172.16.240.101
+#set firewall group address-group SSH-ACCESS address 172.16.240.102
+#set firewall name OUTSIDE-LOCAL rule 310 source group address-group SSH-ACCESS
 ----
 set firewall name OUTSIDE-LOCAL default-action 'drop'
-set firewall name OUTSIDE-LOCAL rule 310 source group address-group SSH-ACCESS
+
 set firewall name OUTSIDE-LOCAL rule 310 action 'accept'
 set firewall name OUTSIDE-LOCAL rule 310 destination port '22'
+set firewall name OUTSIDE-LOCAL rule 310 destination port '2244'
 set firewall name OUTSIDE-LOCAL rule 310 protocol 'tcp'
 set firewall name OUTSIDE-LOCAL rule 900 action 'accept'
 set firewall name OUTSIDE-LOCAL rule 900 description 'allow icmp'
 set firewall name OUTSIDE-LOCAL rule 900 protocol 'icmp'
 ----
+
 `set interfaces ethernet eth0 firewall local name 'OUTSIDE-LOCAL'`
 
 
