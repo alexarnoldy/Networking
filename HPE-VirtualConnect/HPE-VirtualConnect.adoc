@@ -1,0 +1,26 @@
+* To see current VLAN mappings:
+----
+->show server-port-map C3_Blade16:1
+->show server-port-map C3_Blade16:2
+----
+
+* To change native VLAN from 220 to 240:
+----
+->set server-port-map C3_Blade16:1 IHV_A_240 UplinkSet=IHV_A Untagged=true
+ERROR: Invalid property : UplinkSet
+
+->set server-port-map C3_Blade16:1 IHV_A_240 Untagged=true                 
+ERROR: Another network has already been configured to handle untagged packets
+
+->set server-port-map C3_Blade16:1 IHV_A_220 Untagged=false
+SUCCESS: Server port mapping modified
+
+->set server-port-map C3_Blade16:2 IHV_B_220 Untagged=false 
+SUCCESS: Server port mapping modified
+
+->set server-port-map C3_Blade16:1 IHV_A_240 Untagged=true  
+SUCCESS: Server port mapping modified
+
+->set server-port-map C3_Blade16:2 IHV_B_240 Untagged=true 
+SUCCESS: Server port mapping modified
+----
