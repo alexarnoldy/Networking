@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+#
+
+set force_conservative 0  ;# set to 1 to force conservative mode even if
+			  ;# script wasn't run conservatively originally
+if {$force_conservative} {
+	set send_slow {1 .1}
+	proc send {ignore arg} {
+		sleep .1
+		exp_send -s -- $arg
+	}
+}
+
+
+set IPADDR  [lindex $argv 0] 
+set PASSWORD [lindex $argv 1]  
+set CHASSIS  [lindex $argv 2] 
+set BLADE  [lindex $argv 3] 
+set CURRENT_VLAN  [lindex $argv 4] 
+set NEXT_VLAN  [lindex $argv 5] 
+
+set timeout -1
+match_max 100000
+spawn ssh admin@${IPADDR}
+send -- "\r"
+expect "admin*password: "
+send -- "$PASSWORD\r"
+expect -exact "->"
+send -- "set server-port-map C${CHASSIS}_Blade${BLADE}:2 ${CURRENT_VLAN} Untagged=false\r"
+send -- "set server-port-map C${CHASSIS}_Blade${BLADE}:2 ${NEXT_VLAN} Untagged=true\r"
+send -- "exit\r"
+expect eof
