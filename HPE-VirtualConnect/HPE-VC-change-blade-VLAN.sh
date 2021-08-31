@@ -1,5 +1,11 @@
 #!/bin/bash
 
+## Script to set the Virtual Connect native VLAN for a blade in a C7000 chassis.
+##
+## Usage: HPE-VC-change-blade-VLAN.sh <Chassis number, i.e. 3>  <Blade number, i.e. 09> <New VLAN, i.e. 249>
+##
+## alex.arnoldy@suse.com 08/30/2021
+
 PASSWORD=$(cat ~/.VCPW)
 CHASSIS=$1
 BLADE=$2
