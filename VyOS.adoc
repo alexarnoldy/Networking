@@ -55,7 +55,9 @@ set service dns forwarding allow-from 10.0.0.0/24
 ----
 
 * https://lucanuscervus-notes.readthedocs.io/en/latest/Networking/VyOS/dhcp%20and%20dns%20server%20in%20VyOS/
-
+* CMD: `run show dhcp server leases`
+* CMD: `run show config comm | grep dhcp`  to see DHCP config
+** Also: `show service dhcp-server shared-network-name INSIDE-NET`
 
 ## Setting up NAT routing and firewall features
 
